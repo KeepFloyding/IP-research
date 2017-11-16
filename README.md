@@ -46,13 +46,19 @@ Alternatively, anyone of the notebooks can be run independantly provided that th
 
 ### 1. Extracting Clickstream Data
 
-The clickstream data can be extracted from the IP database. This will be documented later. 
+The clickstream data can be extracted from the IP database by running 
 
-The raw clickstream data is comprised of the clickstream data of each student and teacher within a certain period of time. Each of these users are linked to a school as given in a seperate csv:
+```
+python retrieve_data.py
+```
+
+in the IP server. This file requires SQL_helper.py and configDB.py where the latter needs to be completed with the user_id, database name and password. The file saves the csv files 
 
 * teacher_group.csv (teacher clickstream data)
 * user_group.csv (student clickstream data)
-* user_details (linking each user (student or teacher) to a particular school). 
+* user_details.csv (linking each user (student or teacher) to a particular school). 
+
+This data is comprised of the clickstream data of each student and teacher within a certain period of time. Each of these users are linked to a school as given by 'user_details.csc':
 
 The python notebook 
 
