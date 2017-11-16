@@ -46,17 +46,42 @@ Alternatively, anyone of the notebooks can be run independantly provided that th
 
 ### 1. Extracting Clickstream Data
 
-Extracting clickstream data from the IP database with a SQL query. This has to be done in the IP server and requires access to the database. 
+The clickstream data can be extracted from the IP database. This will be documented later. 
 
-The result are 2 csv files that contain the clickstream data for teachers and students. This is then cleaned, joined and grouped by school in the notebook X. 
+The raw clickstream data is comprised of the clickstream data of each student and teacher within a certain period of time. Each of these users are linked to a school as given in a seperate csv:
+
+* teacher_group.csv (teacher clickstream data)
+* user_group.csv (student clickstream data)
+* user_details (linking each user (student or teacher) to a particular school). 
+
+The python notebook 
+
+```
+1_combine_clk_data.ipynb 
+```
+
+combines the data from these CSVs and cleans them in suitable format for analysis. The final dataframe is saved as 'school_clk_data.csv'.
+
 
 ### 2. Organising External Data
 
-The external data that is provided needs to be combined. This operation is performed by the X python notebook. 
+The external raw data is comprised of 2 seperate csv files
 
-### Combining External Data with Clickstream Data
+* exam results for each school (A2 results 2014-16.csv)
+* external indicators for each school (external_outer_indicators.csv)
 
-This one is done in the python notebook X.py. 
+These 2 csv files are cleaned, combined and saved as a seperate csv (school_ext_data.csv) in the python notebook:
 
-Here we also conduct the main analysis.
+```
+2_extract_ext_data.ipynb
+```
 
+### 3. Combining External Data with Clickstream Data
+
+The 'all_data_joined.ipynb' notebook does the following:
+
+* Combines external and internal dataframes by school
+* Create new features and indices
+* Perform statistical analysis
+
+Any additional indices can be incoporated and tested. 
