@@ -43,50 +43,22 @@ def create_string(file_name):
 
     return q
 
-def prepare_df(df,start_date, dt, date_feature, group_array):
+def prepare_df(df,date_feature, group_array,start_date,end_date):
 
+    # Convert to datetime format
     df[date_feature] = pd.to_datetime(df[date_feature])
-    df[start_date] = pd.to_datetime(df[start_date])
-    df['event_leg'] = np.floor((df[date_feature] - df[start_date]).dt.total_seconds()/dt)
 
-    #df.drop('date_created',axis=1)
+    # Select data from dates according to start_date and end_date
+    df = df[df[date_feature]>= pd.to_datetime(start_date)]
+    df = df[df[date_feature]<= pd.to_datetime(end_date)]
+
+    # Group according to categories
     df_grp = df.groupby(group_array).count();
-    df_grp = df_grp.xs(date_feature, axis=1, drop_level=True)
 
-    df_grp = df_grp.unstack().fillna(0)
-    #df_grp = df_grp.reset_index()
-
-    return df_grp
-
-def prepare_df_new(df,start_date, dt, date_feature, group_array):
-
-    df[date_feature] = pd.to_datetime(df[date_feature])
-    df[start_date] = pd.to_datetime(df[start_date])
-    df['last_seen'] = pd.to_datetime(df['last_seen'])
-    df['event_leg'] = np.floor((df[date_feature] - df[start_date]).dt.total_seconds()/dt)
-    df['churn_leg'] = np.floor((df['last_seen'] - df[start_date]).dt.total_seconds()/dt)
-
-    # Finding churn leg for each user
-    df_churn = df.groupby('user_id')['churn_leg'].max()
-    
-    #df.drop('date_created',axis=1)
-    df_grp = df.groupby(group_array).count();
-    df_grp = df_grp.xs(date_feature, axis=1, drop_level=True)
-
-    df_grp = df_grp.unstack().fillna(0)
-    #df_grp = df_grp.reset_index()
-
-    return df_grp, df_churn
-
-def prepare_df_all(df,date_feature, group_array,cut_off):
-
-    df[date_feature] = pd.to_datetime(df[date_feature])
-    df = df[df[date_feature]> pd.to_datetime(cut_off)]
-
-    df_grp = df.groupby(group_array).count();
+    # Unpack the indices into columns
     df_grp = df_grp.xs(date_feature, axis=1, drop_level=True)
     df_grp = df_grp.unstack().fillna(0)
   
-
+    # Return the dataframe
     return df_grp
 
