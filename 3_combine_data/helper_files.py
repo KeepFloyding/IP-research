@@ -1,5 +1,8 @@
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
 
 # Function for univariate linear regression
 # Inputs
@@ -55,7 +58,7 @@ def checkLinearFit(df,x_array,y_array,figsize=(10,10),n_cols=2,n_rows=2,alpha=0.
     # Storing results in a dataframe
     df_out = pd.DataFrame({'X':x_choose,'Y':y_choose,'Coef':coef_array,'intercept':intercept_array,'R^2':R_array})
     
-    return df_out,fig
+    return df_out
 
 # Functions that help with classifiers
 
