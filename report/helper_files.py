@@ -1,5 +1,6 @@
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
+from scipy.stats import ks_2samp
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -173,7 +174,7 @@ def bin_groups(df, feature, bins, group_names):
 
 # Sensitivity test
 
-def sensitivity_on_bin(df, feature_to_bin, features_to_evaluate, bins, group_names, cut_off_array):
+def sensitivity_on_bin_ANOVA(df, feature_to_bin, features_to_evaluate, bins, group_names, cut_off_array):
 
     store= [];
     
@@ -203,6 +204,60 @@ def sensitivity_on_bin(df, feature_to_bin, features_to_evaluate, bins, group_nam
         # Storing the array as a Dataframe
         df_score = pd.DataFrame({'Key':X.keys(),'F score':F,'p values':pval,'Cut off':np.ones(len(X.keys()))*item, 'Num active':num_active, 'Group_2 - Group_0':mu_active_inactive[X.keys()]})
         store.append(df_score)
+
+    df_score = pd.concat(store)
+    
+    return df_score
+
+def non_parametric_test(df_test, feature_list, test_type):
+
+    score_array = [];
+    pval_array = [];
+    
+    for feature in feature_list:
+        test_x = df_test[df_test['categories']=='Active'][feature]
+        test_y = df_test[df_test['categories']=='Inactive'][feature]
+
+        score, pval = test_type(test_x,test_y)
+        
+        score_array.append(score)
+        pval_array.append(pval)
+        
+    df_report = pd.DataFrame({'Feature':feature_list,'Score':score_array,'P val':pval_array})
+    
+    return df_report.sort_values('P val')
+    
+
+def sensitivity_on_bin_scipy(df, feature_to_bin, features_to_evaluate, bins, group_names, cut_off_array, test_type = ks_2samp):
+
+    store= [];
+    
+    group_0 = group_names[0]
+    group_1 = group_names[1]
+    group_2 = group_names[2]
+
+    for item in cut_off_array:
+
+        # Updating bins
+        bins[2] = item
+        
+        # Binning the groups
+        df_test = df
+        df_test['categories'] = bin_groups(df_test,feature_to_bin, bins,group_names)
+        num_active = df_test['categories'].value_counts().loc[group_2]
+        df_test = df_test[df_test['categories']!= group_1]
+
+        # Performing a statistical test
+        df_report = non_parametric_test(df_test, features_to_evaluate, test_type)
+        
+        # Determining difference in means between active and inactive groups
+        mu_active_inactive = df_test[df_test['categories']==group_2][features_to_evaluate].mean() - df_test[df_test['categories']==group_0][features_to_evaluate].mean()
+    
+        # Creating a dataframe
+        df_new = pd.DataFrame({'Key':features_to_evaluate,'Score':df_report['Score'],'P val': df_report['P val'], 'Cut off':np.ones(len(features_to_evaluate))*item})
+    
+        # Storing the array as a Dataframe
+        store.append(df_new)
 
     df_score = pd.concat(store)
     
