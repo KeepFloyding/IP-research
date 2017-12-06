@@ -27,7 +27,7 @@ def bin_groups(df, feature, bins, group_names):
     categories = pd.cut(df[feature],bins, labels=group_names)
     return categories
 
-def plotHistograms(df, feature_list,nrows, ncols, figsize=(20,10)):
+def plotHistograms(df, feature_list,nrows, ncols, figsize=(20,10), group_1 = 'Inactive', group_2 = 'Active'):
     
     plt.subplots(nrows=nrows,ncols=ncols,figsize=figsize);
 
@@ -35,8 +35,8 @@ def plotHistograms(df, feature_list,nrows, ncols, figsize=(20,10)):
     for feature in feature_list:
         
         plt.subplot(nrows,ncols,count)
-        plt.hist(df[df['categories']=='Inactive'][feature])
-        plt.hist(df[df['categories']=='Active'][feature],alpha=0.8)
+        plt.hist(df[df['categories']==group_1][feature])
+        plt.hist(df[df['categories']==group_2][feature],alpha=0.8)
         plt.xlabel(feature)
         count += 1
 
