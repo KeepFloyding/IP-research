@@ -27,7 +27,7 @@ def bin_groups(df, feature, bins, group_names):
     categories = pd.cut(df[feature],bins, labels=group_names)
     return categories
 
-def plotHistograms(feature_list,nrows, ncols, figsize=(20,10)):
+def plotHistograms(df, feature_list,nrows, ncols, figsize=(20,10)):
     
     plt.subplots(nrows=nrows,ncols=ncols,figsize=figsize);
 
@@ -82,20 +82,22 @@ def sensitivity_on_bin(df, feature_to_bin, features_to_evaluate, bins, group_nam
         df_test = df_test[df_test['categories']!= group_1]
 
         # Determining difference in means between active and inactive groups
-        mu_active_inactive = df_test[df_test['categories']==group_2].filter(regex='exam_improv').mean() - df_test[df_test['categories']==group_0][features_to_evaluate].mean()
+        mu_active_inactive = df_test[df_test['categories']==group_2][features_to_evaluate].mean() - df_test[df_test['categories']==group_0][features_to_evaluate].mean()
 
         # Performing an ANOVA test
         if test_type == 'ANOVA':
             X = df_test[features_to_evaluate]
             y = [1 if item == group_2 else 0 for item in df_test['categories']]
             F, pval = f_classif(X, y)
-            df_score = pd.DataFrame({'Key':X.keys(),'F score':F,'p values':pval,'Cut off':np.ones(len(X.keys()))*item, 'Num active':num_active, 'Group_2 - Group_0':mu_active_inactive[X.keys()]})
-
+            df_score = pd.DataFrame({'Key':X.keys(),'Score':F,'p values':pval,'Cut off':np.ones(len(X.keys()))*item, 'Num active':num_active, 'Group_2 - Group_0':mu_active_inactive[X.keys()]})
 
         # Performing non-parametric statistical tests
         else:
+            X = df_test[features_to_evaluate]
             df_report = non_parametric_test(df_test, features_to_evaluate, test_type)
-            df_score = pd.DataFrame({'Key':features_to_evaluate,'Score':df_report['Score'],'p values':df_report['P val'],'Cut off':np.ones(len(features_to_evaluate))*item, 'Num active':num_active, 'Group_2 - Group_0':mu_active_inactive[features_to_evaluate]})
+
+            #df_score = pd.DataFrame({'Key':X.keys(),'p values':df_report['P val'],'Group_2 - Group_0':mu_active_inactive[X.keys()].values})
+            df_score = pd.DataFrame({'Key':X.keys(),'Score':df_report['Score'],'p values':df_report['P val'],'Cut off':np.ones(len(features_to_evaluate))*item, 'Num active':num_active, 'Group_2 - Group_0':mu_active_inactive[X.keys()].values})
 
         # Storing the array as a Dataframe
         store.append(df_score)
@@ -103,6 +105,26 @@ def sensitivity_on_bin(df, feature_to_bin, features_to_evaluate, bins, group_nam
     df_score = pd.concat(store)
     
     return df_score
+
+def plot_sensitivity(df_score, x_range, y_range):
+
+    n_rows = len(x_range)
+    n_cols = len(y_range)
+    plt.subplots(n_rows,n_cols, figsize=(10,40))
+
+    count = 1
+    for item_x in x_range:
+        
+        df_test = df_score[df_score['Key'] == item_x]
+        for item_y in y_range:
+
+            plt.subplot(n_rows,n_cols,count)
+            plt.scatter(df_test['Cut off'],df_test[item_y])
+            plt.xlabel('Cut off')
+            plt.ylabel(item_y)
+            plt.title(item_x)
+            
+            count += 1
 
 
 # ----------------------------------------------------------------------------------------------------
