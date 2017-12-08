@@ -97,7 +97,43 @@ def sensitivity_on_bin(df, feature_to_bin, features_to_evaluate, bins, group_nam
             df_report = non_parametric_test(df_test, features_to_evaluate, test_type)
 
             #df_score = pd.DataFrame({'Key':X.keys(),'p values':df_report['P val'],'Group_2 - Group_0':mu_active_inactive[X.keys()].values})
-            df_score = pd.DataFrame({'Key':X.keys(),'Score':df_report['Score'],'p values':df_report['P val'],'Cut off':np.ones(len(features_to_evaluate))*item, 'Num active':num_active, 'Group_2 - Group_0':mu_active_inactive[X.keys()].values})
+            df_score = pd.DataFrame({'Key':df_report['Feature'],'Score':df_report['Score'],'p values':df_report['P val'],'Cut off':np.ones(len(features_to_evaluate))*item, 'Num active':num_active, 'Group_2 - Group_0':mu_active_inactive[X.keys()].values})
+
+        # Storing the array as a Dataframe
+        store.append(df_score)
+
+    df_score = pd.concat(store)
+    
+    return df_score
+
+
+def sensitivity_on_bin_non_para(df, feature_to_bin, features_to_evaluate, bins, group_names, cut_off_array, test_type):
+
+    store= [];
+    
+    group_0 = group_names[0]
+    group_1 = group_names[1]
+    group_2 = group_names[2]
+
+    for item in cut_off_array:
+
+        # Updating bins
+        bins[2] = item
+        
+        # Binning the groups
+        df_test = df
+        df_test['categories'] = bin_groups(df_test,feature_to_bin, bins,group_names)
+        num_active = df_test['categories'].value_counts().loc[group_2]
+        df_test = df_test[df_test['categories']!= group_1]
+
+        # Determining difference in means between active and inactive groups
+        mu_active_inactive = df_test[df_test['categories']==group_2][features_to_evaluate].mean() - df_test[df_test['categories']==group_0][features_to_evaluate].mean()
+
+        # Performing non-parametric statistical tests
+        X = df_test[features_to_evaluate]
+        df_report = non_parametric_test(df_test, features_to_evaluate, test_type)
+
+        df_score = pd.DataFrame({'Key':df_report['Feature'],'Score':df_report['Score'],'p values':df_report['P val'],'Cut off':np.ones(len(features_to_evaluate))*item, 'Num active':num_active, 'Group_2 - Group_0':mu_active_inactive[df_report['Feature']].values})
 
         # Storing the array as a Dataframe
         store.append(df_score)
