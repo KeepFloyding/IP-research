@@ -2,29 +2,18 @@
 
 Users leave platform after a certain time period. Attempt to determine why that might be the case for each class of users. 
 
+* Students not affiliated with a teacher
+* Students affiliated with a teacher
+* Teachers themselves
+
 ## Deploying
 
-Users are split into 3 seperate categories 
+Each folder contains the code required to 
 
-* Teachers
-* Students that are not affiliated with teachers
-* Students that are affiliated with teachers
-
-### Extract Data
-
-The raw data for each is extracted and manipulated in the extract_data folder.
-
-This data is then used to perform analysis on user churn rates. 
-
-### Preliminary data analysis
-
-Checking some basic stats.
-How different are the 3 groups from one another.
-
-### Predicting user churn
-
-Predicting user churn for each group.
-
+* Extract data
+* Manipulate into readable form
+* Preliminary data analysis
+* Prediction of churn 
 
 
 
